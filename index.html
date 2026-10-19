@@ -7,7 +7,7 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Опись дел">
-<meta name="app-version" content="2026-10-19.3">
+<meta name="app-version" content="2026-10-19.4">
 <meta name="theme-color" content="#E9EDF2" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#12161C" media="(prefers-color-scheme: dark)">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
@@ -532,11 +532,17 @@ function reminderNotes(t){
   if(t.subtasks.length)parts.push('Подзадачи:\n'+t.subtasks.map(s=>(s.done?'✓ ':'– ')+s.title).join('\n'));
   return parts.join('\n\n');
 }
+// дата в формате ISO 8601 с часовым поясом телефона: «Команды» распознают его при любом языке системы
+function isoLocal(day,time){
+  const [y,m,d]=day.split('-').map(Number), [hh,mm]=time.split(':').map(Number);
+  const off=-new Date(y,m-1,d,hh,mm).getTimezoneOffset(), sg=off>=0?'+':'-', a=Math.abs(off);
+  return day+'T'+pad(hh)+':'+pad(mm)+':00'+sg+pad(Math.floor(a/60))+':'+pad(a%60);
+}
 function sendReminder(t){
   const name=(db.settings.shortcut||'').trim();
   if(!name){toast('Укажите название команды в настройках');return;}
   const payload={title:t.title,notes:reminderNotes(t)};
-  if(t.due)payload.due=t.due+' '+(t.time||'09:00');
+  if(t.due)payload.due=isoLocal(t.due,t.time||'09:00');
   t.reminder={sentAt:now(),done:false,doneAt:null,manual:false};
   save();render();
   location.href='shortcuts://run-shortcut?name='+encodeURIComponent(name)+'&input=text&text='+encodeURIComponent(JSON.stringify(payload));
