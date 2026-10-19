@@ -7,6 +7,7 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Опись дел">
+<meta name="app-version" content="2026-10-19.3">
 <meta name="theme-color" content="#E9EDF2" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#12161C" media="(prefers-color-scheme: dark)">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
@@ -183,6 +184,14 @@ details.help summary{cursor:pointer;font-weight:600;padding:6px 0}
 .pv .txt{flex:1;min-width:0;word-wrap:break-word}
 .sum{font-size:14px;color:var(--muted);margin-top:8px}
 
+/* update banner */
+.upd{position:fixed;left:16px;right:16px;bottom:calc(92px + env(safe-area-inset-bottom,0px));max-width:648px;margin:0 auto;z-index:25;background:var(--accent);color:var(--accent-ink);border-radius:14px;padding:12px 14px;display:flex;gap:12px;align-items:center;box-shadow:0 6px 18px rgba(0,0,0,.2)}
+.upd span{flex:1;font-size:15px}
+.upd button{border:0;border-radius:10px;padding:8px 12px;font-weight:700;background:var(--accent-ink);color:var(--accent)}
+.upd button.later{background:none;color:var(--accent-ink);font-weight:400;padding:8px 4px}
+.upd:not([hidden]) ~ .toast{bottom:calc(160px + env(safe-area-inset-bottom,0px))}
+.verline{font-size:14px;color:var(--muted);margin:0 0 8px}
+
 /* toast */
 .toast{position:fixed;left:50%;bottom:calc(92px + env(safe-area-inset-bottom,0px));transform:translate(-50%,20px);opacity:0;pointer-events:none;background:var(--ink);color:var(--surface);border-radius:12px;padding:10px 14px;display:flex;gap:14px;align-items:center;z-index:30;width:max-content;max-width:calc(100% - 32px);font-size:15px;transition:all .2s}
 .toast.show{opacity:1;transform:translate(-50%,0);pointer-events:auto}
@@ -286,6 +295,13 @@ details.help summary{cursor:pointer;font-weight:600;padding:6px 0}
     </div>
 
     <div class="sec">
+      <h3>Приложение</h3>
+      <p class="verline">Версия <span id="verText"></span></p>
+      <div class="actions"><button class="btn" id="checkUpd">Проверить обновления</button></div>
+      <p class="hint">Обновление загружает новую версию приложения. Задачи при этом сохраняются.</p>
+    </div>
+
+    <div class="sec">
       <h3>Резервная копия</h3>
       <p class="hint" style="margin-top:0">Задачи хранятся только на этом телефоне. Время от времени сохраняйте копию в «Файлы» или iCloud.</p>
       <div class="actions"><button class="btn" id="exportBtn">Сохранить копию</button><button class="btn" id="importBtn">Загрузить из копии</button></div>
@@ -310,6 +326,8 @@ details.help summary{cursor:pointer;font-weight:600;padding:6px 0}
     <div class="sheet-f"><button type="button" class="btn" data-close>Отмена</button><button type="button" class="btn primary" id="impDo" disabled>Импортировать</button></div>
   </div>
 </div>
+
+<div class="upd" id="updBar" hidden role="status"><span>Есть новая версия приложения</span><button class="later" id="updLater">Позже</button><button id="updGo">Обновить</button></div>
 
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
@@ -865,8 +883,51 @@ function toast(msg,action){
   toastTimer=setTimeout(()=>el.classList.remove('show'),action?5000:2600);
 }
 
-/* re-render when returning from Shortcuts or at midnight so "today/overdue" stays right */
-document.addEventListener('visibilitychange',()=>{if(!document.hidden)render();});
+/* ---------- app update ---------- */
+const APP_VERSION=(document.querySelector('meta[name="app-version"]')||{}).content||'';
+$('#verText').textContent=APP_VERSION;
+let lastCheck=0, updDismissed=false;
+async function fetchRemoteVersion(){
+  if(!/^https?:$/.test(location.protocol))throw new Error('offline');
+  const url=location.pathname+'?v='+Date.now();
+  const r=await fetch(url,{cache:'no-store'});
+  if(!r.ok)throw new Error('http '+r.status);
+  const m=(await r.text()).match(/<meta name="app-version" content="([^"]+)"/);
+  if(!m)throw new Error('no version');
+  return m[1];
+}
+async function checkUpdate(manual){
+  lastCheck=Date.now();
+  try{
+    const remote=await fetchRemoteVersion();
+    if(remote!==APP_VERSION){if(manual||!updDismissed)$('#updBar').hidden=false;if(manual)closeSheet($('#setSheet'));}
+    else if(manual)toast('Установлена последняя версия');
+  }catch(e){if(manual)toast('Не удалось проверить обновления. Проверьте интернет');}
+}
+async function applyUpdate(){
+  $('#updGo').disabled=true;$('#updGo').textContent='Обновляю…';
+  save();saveUI();
+  try{await fetch(location.pathname,{cache:'reload'});}catch(e){}
+  try{sessionStorage.setItem('opis-upd-from',APP_VERSION);}catch(e){}
+  location.reload();
+}
+$('#updGo').addEventListener('click',applyUpdate);
+$('#updLater').addEventListener('click',()=>{updDismissed=true;$('#updBar').hidden=true;});
+$('#checkUpd').addEventListener('click',()=>checkUpdate(true));
+/* после обновления: если версия не сменилась (сработал старый кэш), открываем страницу с меткой, минуя кэш */
+try{
+  const from=sessionStorage.getItem('opis-upd-from');
+  if(from){
+    sessionStorage.removeItem('opis-upd-from');
+    if(from===APP_VERSION&&!/[?&]v=/.test(location.search)){location.replace(location.pathname+'?v='+Date.now());}
+    else if(from!==APP_VERSION)setTimeout(()=>toast('Приложение обновлено до версии '+APP_VERSION),300);
+  }
+}catch(e){}
+if(/[?&]v=/.test(location.search)){try{history.replaceState(null,'',location.pathname);}catch(e){}}
+
+/* re-render when returning from Shortcuts or at midnight so "today/overdue" stays right; check updates at most once a minute */
+document.addEventListener('visibilitychange',()=>{if(!document.hidden){render();if(Date.now()-lastCheck>60000)checkUpdate(false);}});
+setTimeout(()=>checkUpdate(false),1500);
 
 render();
 })();
