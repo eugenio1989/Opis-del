@@ -38,6 +38,10 @@
   --shadow:none; color-scheme:dark;
 }
 *,*::before,*::after{box-sizing:inherit}
+[hidden]{display:none!important}
+.chip.new{border-style:dashed;background:none;color:var(--accent)}
+.chips+.addsub{margin-top:8px}
+.nocats{font-size:14px;color:var(--muted)}
 html{scroll-padding-top:env(safe-area-inset-top,0px);-webkit-text-size-adjust:100%}
 body{margin:0;background:var(--bg);color:var(--ink);
   font:16px/1.4 -apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",Roboto,sans-serif;
@@ -227,7 +231,10 @@ details.help summary{cursor:pointer;font-weight:600;padding:6px 0}
   <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="formTitle">
     <div class="sheet-h"><h2 id="formTitle">Новая задача</h2><button class="x" data-close aria-label="Закрыть">×</button></div>
     <div class="field"><label for="fTitle">Задача</label><input class="inp" id="fTitle" placeholder="Что нужно сделать"></div>
-    <div class="field"><label for="fCat">Категория</label><input class="inp" id="fCat" list="catOptions" placeholder="Выберите или впишите новую"><datalist id="catOptions"></datalist></div>
+    <div class="field"><span class="lbl">Категория</span>
+      <div class="chips" id="fCatChips"></div>
+      <div class="addsub" id="fNewCatRow" hidden><input id="fNewCat" placeholder="Название новой категории" enterkeyhint="done"><button type="button" class="btn" id="fNewCatOk">Добавить</button></div>
+    </div>
     <div class="field"><span class="lbl">Приоритет</span>
       <div class="seg" id="fPrioSeg"><button type="button" data-p="high">Высокий</button><button type="button" data-p="mid">Средний</button><button type="button" data-p="low">Низкий</button></div>
     </div>
@@ -481,7 +488,11 @@ function reminderBlock(t){
 
 function renderFilters(){
   const chip=(g,v,l,on)=>`<button class="chip${on?' on':''}" data-group="${g}" data-val="${esc(v)}">${esc(l)}</button>`;
-  $('#fCats').innerHTML=allCats().map(c=>chip('cat',c,c,ui.cats.includes(c))).join('');
+  // в фильтре только категории, у которых есть задачи в текущем разделе (плюс уже выбранные, чтобы фильтр не был скрытым)
+  const pool=db.tasks.filter(t=>ui.view==='archive'?!!t.completedAt:!t.completedAt);
+  const used=[...new Set(pool.map(t=>t.category))].sort((a,b)=>a.localeCompare(b,'ru'));
+  ui.cats.forEach(c=>{if(!used.includes(c))used.push(c);});
+  $('#fCats').innerHTML=used.length?used.map(c=>chip('cat',c,c,ui.cats.includes(c))).join(''):'<span class="nocats">Пока нет задач</span>';
   $('#fPrio').innerHTML=Object.entries(PRIO).map(([k,v])=>chip('prio',k,v.label,ui.prios.includes(k))).join('');
   $('#fDue').innerHTML=[['all','Любой'],['over','Просрочено'],['today','Сегодня'],['week','Ближайшие 7 дней'],['none','Без срока']].map(([k,l])=>chip('due',k,l,ui.due===k)).join('');
   $('#fRem').innerHTML=[['all','Любое'],['none','Не создано'],['sent','Создано'],['done','Выполнено']].map(([k,l])=>chip('rem',k,l,ui.rem===k)).join('');
@@ -587,12 +598,32 @@ function subRow(s){
   return d;
 }
 $('#fAddSub').addEventListener('click',()=>{const r=subRow(null);$('#fSubs').appendChild(r);r.querySelector('input').focus();});
+let formCat='', formExtraCats=[];
+function renderFormCats(){
+  const list=allCats();formExtraCats.forEach(c=>{if(!list.includes(c))list.push(c);});
+  if(formCat&&!list.includes(formCat))list.push(formCat);
+  $('#fCatChips').innerHTML=list.map(c=>`<button type="button" class="chip${c===formCat?' on':''}" data-fcat="${esc(c)}">${esc(c)}</button>`).join('')
+    +'<button type="button" class="chip new" data-fcatnew>+ Новая</button>';
+}
+$('#fCatChips').addEventListener('click',e=>{
+  const b=e.target.closest('[data-fcat],[data-fcatnew]');if(!b)return;
+  if(b.hasAttribute('data-fcatnew')){$('#fNewCatRow').hidden=false;$('#fNewCat').focus();return;}
+  formCat=b.dataset.fcat;renderFormCats();
+});
+function addFormCat(){
+  const v=$('#fNewCat').value.trim();if(!v){$('#fNewCat').focus();return;}
+  const exist=allCats().concat(formExtraCats).find(c=>c.toLowerCase()===v.toLowerCase());
+  if(exist)formCat=exist;else{formExtraCats.push(v);formCat=v;}
+  $('#fNewCat').value='';$('#fNewCatRow').hidden=true;renderFormCats();
+}
+$('#fNewCatOk').addEventListener('click',addFormCat);
+$('#fNewCat').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();addFormCat();}});
 function openForm(t){
   editingId=t?t.id:null;
   $('#formTitle').textContent=t?'Изменить задачу':'Новая задача';
-  $('#catOptions').innerHTML=allCats().map(c=>`<option value="${esc(c)}">`).join('');
   $('#fTitle').value=t?t.title:'';
-  $('#fCat').value=t?t.category:(ui.cats.length===1?ui.cats[0]:'');
+  formCat=t?t.category:(ui.cats.length===1?ui.cats[0]:'');formExtraCats=[];
+  $('#fNewCatRow').hidden=true;$('#fNewCat').value='';renderFormCats();
   setPrio(t?t.priority:'mid');
   $('#fDueDate').value=t?t.due:'';
   $('#fTime').value=t?t.time:'';
@@ -606,7 +637,8 @@ $('#addBtn').addEventListener('click',()=>openForm(null));
 $('#fSave').addEventListener('click',()=>{
   const title=$('#fTitle').value.trim();
   if(!title){toast('Впишите, что нужно сделать');$('#fTitle').focus();return;}
-  const category=$('#fCat').value.trim()||'Разное';
+  if(!$('#fNewCatRow').hidden&&$('#fNewCat').value.trim())addFormCat();
+  const category=formCat||'Разное';
   if(!db.categories.includes(category))db.categories.push(category);
   const old=editingId?findTask(editingId):null;
   const oldSubs=new Map((old?old.subtasks:[]).map(s=>[s.id,s]));
