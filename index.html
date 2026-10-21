@@ -1,14 +1,14 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-OIIDZQbD4cvY9AtOcDrj7wxY1nkj9B4fDLnuclOX1lU='; style-src 'unsafe-inline'; img-src 'self' data: blob:; font-src data:; connect-src 'self'; worker-src 'none'; object-src 'none'; frame-src 'none'; media-src 'none'; manifest-src 'none'; base-uri 'none'; form-action 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-DM4DnpwwnjvpR+q5GVyLkhG9+zzUsLaN2oZ3U42ZuIQ='; style-src 'unsafe-inline'; img-src 'self' data: blob:; font-src data:; connect-src 'self'; worker-src 'none'; object-src 'none'; frame-src 'none'; media-src 'none'; manifest-src 'none'; base-uri 'none'; form-action 'none'">
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black">
 <meta name="apple-mobile-web-app-title" content="Опись дел">
-<meta name="app-version" content="2026-10-21.1">
+<meta name="app-version" content="2026-10-21.2">
 <meta name="theme-color" content="#000000">
 <meta name="referrer" content="no-referrer">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
@@ -509,7 +509,7 @@ textarea.inp.one { min-height: 40px; }
       </div></details>
       <details><summary>Ограничения</summary><div>
         <p>Данные живут только на этом телефоне и не синхронизируются с другими устройствами. Если открывать приложение во вкладке Safari, а не с иконки, iOS может со временем очистить данные.</p>
-        <p>Лимиты: до 5 000 задач, идей и баек каждого вида, до 200 подзадач у задачи, до 30 тегов у байки; название — до 500 знаков, текст и детали — до 20 000 знаков.</p>
+        <p>Лимиты: до 5 000 задач, идей и баек каждого вида, до 200 подзадач у задачи, до 30 тегов у байки. Длина текста в задачах, подзадачах, идеях и байках не ограничена; общий объём резервной копии — до 5 МБ.</p>
       </div></details>
     </section>
     <section>
@@ -541,10 +541,10 @@ textarea.inp.one { min-height: 40px; }
 <dialog class="dlg" id="taskDlg" aria-labelledby="taskT">
   <div class="dlg-h"><h2 id="taskT">Новая задача</h2><button type="button" class="dlg-x" data-close aria-label="Закрыть"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
   <div class="dlg-b">
-    <div class="field"><label for="fTitle">Задача</label><textarea class="inp grow one" id="fTitle" rows="1" maxlength="500" placeholder="Что нужно сделать"></textarea><div class="ferr" id="fTitleErr" role="alert"></div></div>
+    <div class="field"><label for="fTitle">Задача</label><textarea class="inp grow one" id="fTitle" rows="1" placeholder="Что нужно сделать"></textarea><div class="ferr" id="fTitleErr" role="alert"></div></div>
     <div class="field"><span class="lbl" id="fCatLbl">Категория</span>
       <div class="chips" id="fCatChips" role="group" aria-labelledby="fCatLbl"></div>
-      <div class="addrow" id="fNewCatRow" hidden><input id="fNewCat" maxlength="60" placeholder="Название новой категории" aria-label="Название новой категории" enterkeyhint="done"><button type="button" class="btn btn-tertiary" id="fNewCatOk">Добавить</button></div>
+      <div class="addrow" id="fNewCatRow" hidden><input id="fNewCat" placeholder="Название новой категории" aria-label="Название новой категории" enterkeyhint="done"><button type="button" class="btn btn-tertiary" id="fNewCatOk">Добавить</button></div>
     </div>
     <div class="field"><span class="lbl" id="fPrioLbl">Приоритет</span>
       <div class="seg" id="fPrioSeg" role="group" aria-labelledby="fPrioLbl"><button type="button" data-p="high">Высокий</button><button type="button" data-p="mid">Средний</button><button type="button" data-p="low">Низкий</button></div>
@@ -554,7 +554,7 @@ textarea.inp.one { min-height: 40px; }
       <div><label for="fTime">Время</label><input class="inp" id="fTime" type="time"></div>
     </div>
     <div class="hint" style="margin:-8px 0 14px">Время нужно для напоминания. Без него напомнит в 9:00 в день срока.</div>
-    <div class="field"><label for="fDetails">Детали</label><textarea class="inp grow" id="fDetails" maxlength="20000" placeholder="Номера, адреса, ссылки, контекст"></textarea></div>
+    <div class="field"><label for="fDetails">Детали</label><textarea class="inp grow" id="fDetails" placeholder="Номера, адреса, ссылки, контекст"></textarea></div>
     <div class="field"><span class="lbl">Подзадачи</span><div id="fSubs"></div>
       <button type="button" class="btn btn-tertiary" id="fAddSub">Добавить подзадачу</button></div>
   </div>
@@ -568,7 +568,7 @@ textarea.inp.one { min-height: 40px; }
     <div class="sec">
       <h3>Категории дел</h3>
       <div class="catlist" id="catList"></div>
-      <div class="addrow"><input id="newCat" maxlength="60" placeholder="Новая категория" aria-label="Новая категория" enterkeyhint="done"><button type="button" class="btn btn-tertiary" id="addCat">Добавить</button></div>
+      <div class="addrow"><input id="newCat" placeholder="Новая категория" aria-label="Новая категория" enterkeyhint="done"><button type="button" class="btn btn-tertiary" id="addCat">Добавить</button></div>
     </div>
     <div class="sec">
       <h3>Напоминания iPhone</h3>
@@ -627,11 +627,11 @@ textarea.inp.one { min-height: 40px; }
   <div class="dlg-h"><h2 id="ideaT">Новая идея</h2><button type="button" class="dlg-x" data-close aria-label="Закрыть"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
   <div class="dlg-b">
     <div class="field"><span class="lbl" id="ifCatLbl">Категория</span><div class="chips" id="ifCats" role="group" aria-labelledby="ifCatLbl"></div><div class="ferr" id="ifCatErr" role="alert"></div></div>
-    <div class="field"><label for="ifTitle">Идея</label><textarea class="inp grow one" id="ifTitle" rows="1" maxlength="500" placeholder="Куда сходить, что посмотреть, что подарить"></textarea><div class="ferr" id="ifTitleErr" role="alert"></div></div>
+    <div class="field"><label for="ifTitle">Идея</label><textarea class="inp grow one" id="ifTitle" rows="1" placeholder="Куда сходить, что посмотреть, что подарить"></textarea><div class="ferr" id="ifTitleErr" role="alert"></div></div>
     <div id="ifFields"></div>
-    <div class="field"><label for="ifBy">Кто посоветовал</label><input class="inp" id="ifBy" maxlength="200" list="dlBy" placeholder="Человек или источник"></div>
-    <div class="field"><label for="ifLink">Ссылка</label><input class="inp" id="ifLink" maxlength="2000" type="url" inputmode="url" autocapitalize="off" autocorrect="off" placeholder="https://"></div>
-    <div class="field"><label for="ifNote">Заметка</label><textarea class="inp grow" id="ifNote" maxlength="20000" placeholder="Подробности"></textarea></div>
+    <div class="field"><label for="ifBy">Кто посоветовал</label><input class="inp" id="ifBy" list="dlBy" placeholder="Человек или источник"></div>
+    <div class="field"><label for="ifLink">Ссылка</label><input class="inp" id="ifLink" type="url" inputmode="url" autocapitalize="off" autocorrect="off" placeholder="https://"></div>
+    <div class="field"><label for="ifNote">Заметка</label><textarea class="inp grow" id="ifNote" placeholder="Подробности"></textarea></div>
     <div class="hint" style="margin:-6px 0 0">Достаточно названия и категории, остальное можно дописать потом.</div>
   </div>
   <div class="dlg-f"><button type="button" class="btn btn-secondary" data-close>Отмена</button><button type="button" class="btn btn-primary" id="ifSave">Сохранить</button></div>
@@ -643,7 +643,7 @@ textarea.inp.one { min-height: 40px; }
   <div class="dlg-b">
     <p id="doneName" style="margin:0 0 12px;color:var(--ink);font-weight:600;font-size:16px;overflow-wrap:anywhere"></p>
     <div class="field"><span class="lbl" id="doneStarsLbl">Оценка</span><div class="starsel" id="doneStars" role="group" aria-labelledby="doneStarsLbl"></div></div>
-    <div class="field"><label for="doneReview">Отзыв</label><textarea class="inp grow" id="doneReview" maxlength="20000" placeholder="Что понравилось, что нет, кому посоветовать"></textarea></div>
+    <div class="field"><label for="doneReview">Отзыв</label><textarea class="inp grow" id="doneReview" placeholder="Что понравилось, что нет, кому посоветовать"></textarea></div>
   </div>
   <div class="dlg-f"><button type="button" class="btn btn-tertiary" id="doneStory">В архив и написать байку</button><button type="button" class="btn btn-primary" id="doneSave">В архив</button></div>
 </dialog>
@@ -652,12 +652,12 @@ textarea.inp.one { min-height: 40px; }
 <dialog class="dlg" id="storyDlg" aria-labelledby="storyT">
   <div class="dlg-h"><h2 id="storyT">Новая байка</h2><button type="button" class="dlg-x" data-close aria-label="Закрыть"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
   <div class="dlg-b">
-    <div class="field"><label for="sfTitle">Название-подсказка</label><textarea class="inp grow one" id="sfTitle" rows="1" maxlength="500" placeholder="Пара слов, чтобы вспомнить"></textarea></div>
-    <div class="field"><label for="sfText">История</label><textarea class="inp grow" id="sfText" maxlength="20000" placeholder="Что случилось"></textarea><div class="ferr" id="sfErr" role="alert"></div></div>
+    <div class="field"><label for="sfTitle">Название-подсказка</label><textarea class="inp grow one" id="sfTitle" rows="1" placeholder="Пара слов, чтобы вспомнить"></textarea></div>
+    <div class="field"><label for="sfText">История</label><textarea class="inp grow" id="sfText" placeholder="Что случилось"></textarea><div class="ferr" id="sfErr" role="alert"></div></div>
     <div class="field"><span class="lbl">Теги</span><div id="sfTags"></div></div>
     <div class="field two">
       <div><label for="sfDate">Месяц и год</label><input class="inp" id="sfDate" type="month" min="1950-01" max="2100-12"></div>
-      <div><label for="sfWith">С кем</label><input class="inp" id="sfWith" maxlength="200" list="dlWith"></div>
+      <div><label for="sfWith">С кем</label><input class="inp" id="sfWith" list="dlWith"></div>
     </div>
     <label class="opt"><input type="checkbox" id="sfFav">В избранное</label>
   </div>
@@ -675,7 +675,7 @@ textarea.inp.one { min-height: 40px; }
 <dialog class="dlg narrow" id="tagMgrDlg" aria-labelledby="tmT">
   <div class="dlg-h"><h2 id="tmT">Теги</h2><button type="button" class="dlg-x" data-close aria-label="Закрыть"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
   <div class="dlg-b">
-    <div class="addrow"><input id="tmNew" maxlength="60" placeholder="Новый тег" aria-label="Новый тег" enterkeyhint="done" autocomplete="off"><button type="button" class="btn btn-tertiary" id="tmAdd">Добавить</button></div>
+    <div class="addrow"><input id="tmNew" placeholder="Новый тег" aria-label="Новый тег" enterkeyhint="done" autocomplete="off"><button type="button" class="btn btn-tertiary" id="tmAdd">Добавить</button></div>
     <p class="hint">Чтобы объединить похожие теги, переименуйте один в другой, например «поездки» в «путешествия».</p>
     <ul class="tmgr" id="tmList"></ul>
   </div>
@@ -714,8 +714,10 @@ const KEY = 'dela-data-v1', UIKEY = 'dela-ui-v1', ROLLKEY = 'dela-rollback-v1';
 // Лимиты проверяются до тяжёлых операций (п. 4.2 базового промпта)
 const LIM = {
   fileBytes: 5 * 1024 * 1024, pasteChars: 200000, pasteLines: 5000,
-  tasks: 5000, ideas: 5000, stories: 5000, subs: 200, cats: 100, tags: 500, tagsPerStory: 30, fKeys: 20,
-  title: 500, long: 20000, short: 200, link: 2000, tag: 60, cat: 60, shortcut: 100
+  tasks: 5000, ideas: 5000, stories: 5000, subs: 200, cats: 100, tags: 500, tagsPerStory: 30, fKeys: 20, shortcut: 100,
+  // Длина текста в записях не ограничивается: задача или байка должна поместиться целиком.
+  // Объём защищён общим пределом файла копии (5 МБ) и памятью браузера.
+  title: Infinity, long: Infinity, short: Infinity, link: Infinity, tag: Infinity, cat: Infinity
 };
 const BACKUP_DAYS = 30, SNOOZE_DAYS = 7;
 
@@ -1104,7 +1106,8 @@ function ask(o) {
   askCheck = o.check || null;
   if (o.input) {
     $('#askLbl').textContent = o.input.label || 'Значение';
-    const i = $('#askInp'); i.value = o.input.value || ''; i.maxLength = o.input.max || 200;
+    const i = $('#askInp'); i.value = o.input.value || '';
+    if (Number.isFinite(o.input.max)) i.maxLength = o.input.max; else i.removeAttribute('maxlength');
   }
   if (askResolve) askResolve(null);
   openDlg('#askDlg');
@@ -1262,7 +1265,7 @@ function card(t) {
     html += '<div class="body">';
     if (t.details) html += `<div class="details">${esc(t.details)}</div>`;
     if (st.length) html += '<ul class="subs">' + st.map(x => `<li class="${x.done ? 'done' : ''}"><label><input type="checkbox" data-act="sub" data-sid="${x.id}" ${x.done ? 'checked' : ''} ${arch ? 'disabled' : ''}><span>${esc(x.title)}</span></label>${arch ? '' : `<button type="button" class="xbtn" data-act="delsub" data-sid="${x.id}" aria-label="Удалить подзадачу">${icon('x')}</button>`}</li>`).join('') + '</ul>';
-    if (!arch) html += '<div class="addrow"><textarea class="grow" rows="1" maxlength="500" data-subinput placeholder="Новая подзадача" aria-label="Новая подзадача" enterkeyhint="done"></textarea><button type="button" class="btn btn-tertiary" data-act="addsub">Добавить</button></div>';
+    if (!arch) html += '<div class="addrow"><textarea class="grow" rows="1" data-subinput placeholder="Новая подзадача" aria-label="Новая подзадача" enterkeyhint="done"></textarea><button type="button" class="btn btn-tertiary" data-act="addsub">Добавить</button></div>';
     html += reminderBlock(t);
     html += '<div class="actions">' + (arch ? '<button type="button" class="btn btn-tertiary" data-act="restore">Вернуть в работу</button>' : '<button type="button" class="btn btn-tertiary" data-act="edit">Изменить</button>') + '<button type="button" class="btn btn-danger" data-act="delete">Удалить</button></div>';
     if (!arch) html += `<div class="small">Создано ${fmtDate(t.createdAt)}</div>`;
@@ -1396,7 +1399,7 @@ function setPrio(p) { formPrio = p; $$('#fPrioSeg button').forEach(b => b.setAtt
 $('#fPrioSeg').addEventListener('click', e => { const b = e.target.closest('[data-p]'); if (b) setPrio(b.dataset.p); });
 function subRow(s) {
   const d = document.createElement('div'); d.className = 'subed'; d.dataset.sid = s ? s.id : '';
-  d.innerHTML = `<textarea class="inp grow one" rows="1" maxlength="500" placeholder="Подзадача" aria-label="Подзадача">${s ? esc(s.title) : ''}</textarea><button type="button" class="xbtn" aria-label="Удалить подзадачу">${icon('x')}</button>`;
+  d.innerHTML = `<textarea class="inp grow one" rows="1" placeholder="Подзадача" aria-label="Подзадача">${s ? esc(s.title) : ''}</textarea><button type="button" class="xbtn" aria-label="Удалить подзадачу">${icon('x')}</button>`;
   d.querySelector('button').addEventListener('click', () => d.remove());
   return d;
 }
@@ -1834,7 +1837,7 @@ function drawIfFields() {
   if (!c || !c.f.length) { box.innerHTML = ''; return; }
   box.innerHTML = c.f.map(f => f.o
     ? `<div class="field"><span class="lbl" id="iffl_${f.k}">${esc(f.l)}</span><div class="chips" role="group" aria-labelledby="iffl_${f.k}">${f.o.map(o => `<button type="button" class="chip" aria-pressed="${ifF[f.k] === o}" data-fk="${f.k}" data-fo="${esc(o)}">${esc(o)}</button>`).join('')}</div></div>`
-    : `<div class="field"><label for="iff_${f.k}">${esc(f.l)}</label><input class="inp" id="iff_${f.k}" maxlength="200" data-fk="${f.k}" value="${esc(ifF[f.k] || '')}"${f.k === 'for' ? ' list="dlFor"' : ''}></div>`).join('');
+    : `<div class="field"><label for="iff_${f.k}">${esc(f.l)}</label><input class="inp" id="iff_${f.k}" data-fk="${f.k}" value="${esc(ifF[f.k] || '')}"${f.k === 'for' ? ' list="dlFor"' : ''}></div>`).join('');
 }
 $('#ifCats').addEventListener('click', e => { const b = e.target.closest('[data-ifcat]'); if (!b || !IDEA_BY[b.dataset.ifcat]) return; ifCat = b.dataset.ifcat; setFieldErr('#ifCatErr', ''); drawIfCats(); drawIfFields(); });
 $('#ifFields').addEventListener('click', e => { const b = e.target.closest('[data-fo]'); if (!b) return; const k = b.dataset.fk; ifF[k] = ifF[k] === b.dataset.fo ? '' : b.dataset.fo; drawIfFields(); });
@@ -1924,7 +1927,7 @@ function tagCounts() { const c = {}; db.stories.forEach(s => s.tags.forEach(t =>
 // Выбор тегов: существующие предлагаются, новый создаётся явно и потом доступен везде
 function TagPicker(root) {
   let sel = [];
-  root.innerHTML = '<div class="chips tp-sel"></div><input class="inp tp-in" maxlength="60" placeholder="Найти или создать тег" aria-label="Найти или создать тег" enterkeyhint="done" autocomplete="off" autocorrect="off"><div class="chips tp-sug"></div>';
+  root.innerHTML = '<div class="chips tp-sel"></div><input class="inp tp-in" placeholder="Найти или создать тег" aria-label="Найти или создать тег" enterkeyhint="done" autocomplete="off" autocorrect="off"><div class="chips tp-sug"></div>';
   const selEl = root.querySelector('.tp-sel'), inp = root.querySelector('.tp-in'), sug = root.querySelector('.tp-sug');
   const has = t => sel.some(s => s.toLowerCase() === t.toLowerCase());
   function draw() {
